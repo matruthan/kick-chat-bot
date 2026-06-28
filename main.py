@@ -14,7 +14,7 @@ import asyncio
 import threading
 from http.server import SimpleHTTPRequestHandler, HTTPServer
 from playwright.async_api import async_playwright
-from playwright_stealth import stealth_async
+from playwright_stealth import Stealth  # NOVÝ SPÔSOB IMPORTOVANIA
 
 # --- FAKE WEBSERVER PRE RENDER WEB SERVICE ---
 def run_fake_server():
@@ -40,6 +40,9 @@ async def posli_spravu():
             user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
         )
         
+        # Aplikujeme Stealth maskovanie na celý prehliadač (nová metóda)
+        await Stealth().apply_stealth_async(context)
+        
         await context.add_cookies([{
             'name': 'session_token',
             'value': KICK_SESSION_TOKEN,
@@ -50,9 +53,6 @@ async def posli_spravu():
         }])
         
         page = await context.new_page()
-        
-        # Aplikujeme maskovanie (Stealth) priamo na našu kartu v prehliadači
-        await stealth_async(page)
         
         print(f"Otváram chat streamera {CHANNEL_NAME}...")
         await page.goto(f"https://kick.com/{CHANNEL_NAME}")
