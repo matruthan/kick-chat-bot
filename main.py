@@ -1,6 +1,7 @@
-KICK_SESSION_TOKEN = '385722478%7CtbHj70Up0mu1V6Hvx28cOKgeyuNzGCwkBdtPDjoU'  # Tvoj dlhý token s percentami
+from config import KICK_SESSION_TOKEN
 CHANNEL_NAME = 'MGFitman'
-
+import re # Pridaj tento import
+# ... (zvyšok kódu)
 # =====================================================================
 # VŠETKO POD TÝMTO RIADKOM STAČÍ SKOPÍROVAŤ A UŽ TO NIKDY NEMUSÍŠ MENIŤ
 # =====================================================================import os
