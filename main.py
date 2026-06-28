@@ -4,6 +4,7 @@ CHANNEL_NAME = 'MGFitman'
 # =====================================================================
 # VŠETKO POD TÝMTO RIADKOM STAČÍ SKOPÍROVAŤ A UŽ TO NIKDY NEMUSÍŠ MENIŤ
 # =====================================================================import os
+import os
 import sys
 
 os.environ["PLAYWRIGHT_BROWSERS_PATH"] = os.path.join(os.getcwd(), ".playwright")
@@ -13,7 +14,7 @@ import asyncio
 import threading
 from http.server import SimpleHTTPRequestHandler, HTTPServer
 from playwright.async_api import async_playwright
-from playwright_stealth import stealth_async  # NOVÉ: Knižnica na oklamanie Cloudflare
+from playwright_stealth import stealth_async
 
 # --- FAKE WEBSERVER PRE RENDER WEB SERVICE ---
 def run_fake_server():
