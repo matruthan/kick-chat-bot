@@ -3,12 +3,9 @@ CHANNEL_NAME = 'MGFitman'
 
 # =====================================================================
 # VŠETKO POD TÝMTO RIADKOM STAČÍ SKOPÍROVAŤ A UŽ TO NIKDY NEMUSÍŠ MENIŤ
-# =====================================================================
-
-import os
+# =====================================================================import os
 import sys
 
-# Nastavenie permanentnej cesty pre prehliadač Playwright v rámci Renderu
 os.environ["PLAYWRIGHT_BROWSERS_PATH"] = os.path.join(os.getcwd(), ".playwright")
 
 import time
@@ -16,6 +13,7 @@ import asyncio
 import threading
 from http.server import SimpleHTTPRequestHandler, HTTPServer
 from playwright.async_api import async_playwright
+from playwright_stealth import stealth_async  # NOVÉ: Knižnica na oklamanie Cloudflare
 
 # --- FAKE WEBSERVER PRE RENDER WEB SERVICE ---
 def run_fake_server():
@@ -24,17 +22,23 @@ def run_fake_server():
     print(f"Fake server beží na porte {port} pre spokojnosť Renderu...")
     server.serve_forever()
 
-# Naštartujeme fake server v samostatnom vlákne, aby neblokoval bota
 threading.Thread(target=run_fake_server, daemon=True).start()
 # ---------------------------------------------
 
 async def posli_spravu():
-    print("Spúšťam prehliadač cez Playwright...")
+    print("Spúšťam prehliadač cez Playwright so Stealth maskovaním...")
     async with async_playwright() as p:
-        browser = await p.chromium.launch(headless=True)
-        context = await browser.new_context()
+        # Pridáme špeciálny argument, ktorý vypne detekciu automatizácie
+        browser = await p.chromium.launch(
+            headless=True,
+            args=["--disable-blink-features=AutomationControlled"]
+        )
         
-        # Vloženie cookies pre obídenie Cloudflare ochrany
+        # Nastavíme User-Agent, aby sme sa tvárili ako reálny človek na Windowse
+        context = await browser.new_context(
+            user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+        )
+        
         await context.add_cookies([{
             'name': 'session_token',
             'value': KICK_SESSION_TOKEN,
@@ -45,20 +49,21 @@ async def posli_spravu():
         }])
         
         page = await context.new_page()
+        
+        # Aplikujeme maskovanie (Stealth) priamo na našu kartu v prehliadači
+        await stealth_async(page)
+        
         print(f"Otváram chat streamera {CHANNEL_NAME}...")
         await page.goto(f"https://kick.com/{CHANNEL_NAME}")
         
-        # Čakanie 12 sekúnd na načítanie chatu a overenie Followers-only statusu
-        print("Čakám na overenie followu a načítanie chatu...")
+        print("Čakám 12 sekúnd na prekonanie Cloudflare, overenie followu a načítanie chatu...")
         await asyncio.sleep(12)
         
         try:
             print("Hľadám políčko na písanie správy...")
             
-            # Univerzálny selektor pre moderné četovacie okno na Kicku
             chat_input = page.locator('div[contenteditable="true"], [placeholder*="message"], #message-input')
             
-            # Počkáme max 15 sekúnd, kým bude políčko viditeľné
             await chat_input.first.wait_for(state="visible", timeout=15000)
             
             print("Políčko nájdené, klikám...")
@@ -66,7 +71,6 @@ async def posli_spravu():
             await asyncio.sleep(1)
             
             print("Píšem text správy...")
-            # Písanie s delayom simuluje reálneho človeka a funguje v divoch
             await chat_input.first.type("xd", delay=150)
             await asyncio.sleep(1)
             
