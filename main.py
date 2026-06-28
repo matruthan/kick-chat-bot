@@ -1,3 +1,8 @@
+import os
+import sys
+os.environ["PLAYWRIGHT_BROWSERS_PATH"] = os.path.join(os.getcwd(), ".playwright")
+
+# ... SEM POKRAČUJE TVOJ DOTERAJŠÍ KÓD (import time, asyncio, atď.) ...
 import time
 import asyncio
 import threading
