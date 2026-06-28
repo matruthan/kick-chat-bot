@@ -1,1 +1,1 @@
-KICK_SESSION_TOKEN = 'Tvoj_dlhý_token_sem'
+KICK_SESSION_TOKEN = '385722478%7CtbHj70Up0mu1V6Hvx28cOKgeyuNzGCwkBdtPDjoU'
