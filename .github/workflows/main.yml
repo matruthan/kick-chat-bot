@@ -1,25 +1,29 @@
 name: Kick Bot
+
 on:
   schedule:
     - cron: '*/30 * * * *'
   workflow_dispatch:
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.9'
-      - name: Install
+          
+      - name: Install Dependencies
         run: |
-          pip install -r requirements.txt
+          python -m pip install --upgrade pip
+          pip install playwright
           playwright install chromium
-      - name: Run
+          
+      - name: Run Bot
         run: python main.py
         env:
           KICK_SESSION_TOKEN: ${{ secrets.KICK_SESSION_TOKEN }}
           CHANNEL_NAME: ${{ secrets.CHANNEL_NAME }}
-          # force update
-          
