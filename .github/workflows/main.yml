@@ -21,3 +21,5 @@ jobs:
         env:
           KICK_SESSION_TOKEN: ${{ secrets.KICK_SESSION_TOKEN }}
           CHANNEL_NAME: ${{ secrets.CHANNEL_NAME }}
+          # force update
+          
