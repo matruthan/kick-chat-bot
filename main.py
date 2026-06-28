@@ -5,15 +5,14 @@ import config
 
 async def posli_spravu():
     async with async_playwright() as p:
-        # Spustenie prehliadača (bez nastavenia cesty, aby použil systémovú)
-        browser = await p.chromium.launch(headless=True)
+        # V GitHub Actions musíš použiť --no-sandbox
+        browser = await p.chromium.launch(headless=True, args=['--no-sandbox'])
         context = await browser.new_context()
 
-        # Pridanie session tokenu
         await context.add_cookies([{
-            'name': 'remember_me', # Niekedy sa volá 'kick_session', over si v prehliadači
+            'name': 'kick_session', # Toto je kľúčové, skontroluj v prehliadači
             'value': config.KICK_SESSION_TOKEN,
-            'domain': 'kick.com',
+            'domain': '.kick.com',
             'path': '/'
         }])
 
@@ -21,18 +20,20 @@ async def posli_spravu():
         await stealth_async(page)
         
         print("Pripájam sa na Kick...")
-        await page.goto(f"https://kick.com/{config.CHANNEL_NAME}")
+        await page.goto(f"https://kick.com/{config.CHANNEL_NAME}/chatroom")
         
-        # Čakanie na načítanie chatu
-        await page.wait_for_timeout(5000)
-        
-        # Tu by bola logika na nájdenie inputu a poslanie správy
-        print("Bot je pripojený a pripravený.")
+        # Počkáme na načítanie chatu (CSS selektor pre textové pole)
+        try:
+            await page.wait_for_selector('textarea[placeholder="Send a message..."]', timeout=10000)
+            
+            # Napísanie správy
+            await page.fill('textarea[placeholder="Send a message..."]', "Ahoj, toto je správa od bota!")
+            await page.keyboard.press("Enter")
+            print("Správa odoslaná!")
+        except Exception as e:
+            print(f"Chyba: {e}")
         
         await browser.close()
 
-async def main():
-    await posli_spravu()
-
 if __name__ == "__main__":
-    asyncio.run(main())
+    asyncio.run(posli_spravu())
